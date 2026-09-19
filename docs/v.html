@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Report</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; background: #f5f6f7; color: #1f2328;
+         font: 16px/1.75 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  #app { max-width: 720px; margin: 0 auto; padding: 16px 16px 64px; }
+  #app .card { background: #fff; border-radius: 12px; padding: 18px 16px;
+               box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  h1 { font-size: 19px; margin: 0 0 6px; }
+  h2 { font-size: 16px; margin: 20px 0 8px; padding-left: 8px; border-left: 3px solid #2f6f4f; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+  th, td { border: 1px solid #e3e6e8; padding: 6px 8px; text-align: left; }
+  th { background: #f2f5f3; }
+  .lamp { font-weight: 700; }
+  ul { padding-left: 20px; }
+  .muted { color: #6b7280; font-size: 13px; }
+  a { color: #2f6f4f; word-break: break-all; }
+</style>
+</head>
+<body>
+<div id="app"><p class="muted">载入中…</p></div>
+<script>
+(async function () {
+  var app = document.getElementById('app');
+  function fail(msg) { app.innerHTML = '<div class="card"><p>' + msg + '</p></div>'; }
+  try {
+    var frag = decodeURIComponent(location.hash.replace(/^#/, ''));
+    if (location.search.indexOf('k=') >= 0 && !frag) { frag = decodeURIComponent(location.search.slice(1)); }
+    var parts = frag.split('|');
+    if (parts.length < 2) { fail('链接不完整，无法载入内容。'); return; }
+    var token = parts[0].trim();
+    var keyB64 = parts[1].trim().replace(/-/g, '+').replace(/_/g, '/');
+    var res = await fetch('d/' + token + '.bin', { cache: 'no-store' });
+    if (!res.ok) { fail('内容已归档或链接已失效。'); return; }
+    var b64 = (await res.text()).trim();
+    function b64ToBytes(s) {
+      var bin = atob(s), out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+    var keyBytes = b64ToBytes(keyB64);
+    var key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
+    var blob = b64ToBytes(b64);
+    var iv = blob.slice(0, 12), ct = blob.slice(12);
+    var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ct);
+    app.innerHTML = new TextDecoder('utf-8').decode(pt);
+  } catch (e) {
+    fail('内容载入失败：链接可能已失效或格式不完整。');
+  }
+})();
+</script>
+</body>
+</html>
