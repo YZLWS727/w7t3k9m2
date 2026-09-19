@@ -49,7 +49,8 @@
     var blob = b64ToBytes(b64);
     var iv = blob.slice(0, 12), ct = blob.slice(12);
     var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ct);
-    app.innerHTML = new TextDecoder('utf-8').decode(pt);
+    app.innerHTML = '<p class="muted" style="margin:0 0 8px"><a href="list.html">← 返回报告目录</a></p>' +
+                    new TextDecoder('utf-8').decode(pt);
   } catch (e) {
     fail('内容载入失败：链接可能已失效或格式不完整。');
   }
