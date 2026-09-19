@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>报告目录</title>
+<style>
+  body { margin:0; background:#f5f6f7; color:#1f2328;
+         font:16px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  #app { max-width:720px; margin:0 auto; padding:16px; }
+  h1 { font-size:19px; margin:8px 0 4px; }
+  .muted { color:#6b7280; font-size:13px; }
+  ul { list-style:none; padding:0; margin:14px 0 0; }
+  li { background:#fff; border-radius:10px; margin-bottom:10px;
+       box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  a { display:block; padding:14px 16px; color:#1f2328; text-decoration:none; }
+  a .t { font-weight:600; }
+  a .d { color:#6b7280; font-size:13px; margin-top:2px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>极端事件与家庭物资 · 隔日观察报告</h1>
+  <div class="muted">点击任意一期查看内容（每两天一期，滚动保留最近约半年）</div>
+  <ul id="list"></ul>
+</div>
+<script src="list.js"></script>
+<script>
+(function () {
+  var box = document.getElementById('list');
+  var rows = (window.__R || []).slice().sort(function (a, b) {
+    return (b.d || '').localeCompare(a.d || '') || (b.v || 0) - (a.v || 0);
+  });
+  if (!rows.length) { box.innerHTML = '<li><a>暂无报告</a></li>'; return; }
+  box.innerHTML = rows.map(function (r) {
+    var href = 'v.html#' + r.t + '|' + r.k;
+    return '<li><a href="' + href + '"><span class="t">第' + r.i + '期（第' + (r.v || 1) + '版）</span>' +
+           '<span class="d">' + (r.d || '') + '</span></a></li>';
+  }).join('');
+})();
+</script>
+</body>
+</html>
